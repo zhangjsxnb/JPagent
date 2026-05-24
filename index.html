@@ -12,20 +12,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 .header{padding:0 0 16px;border-bottom:1px solid #e8e8ed;margin-bottom:24px}
 .header h1{font-size:26px;font-weight:600;letter-spacing:-.02em;margin-bottom:4px}
 .header p{font-size:14px;color:#86868b}
-.selector{margin-bottom:28px}
-.selector label{font-size:13px;font-weight:500;color:#86868b;display:block;margin-bottom:6px}
-.selector select{width:260px;padding:10px 14px;border:1px solid #d2d2d7;border-radius:8px;font-size:15px;background:#fff;color:#1d1d1f;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%2386868b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
-.selector select:focus{outline:none;border-color:#007aff;box-shadow:0 0 0 3px rgba(0,122,255,0.12)}
+.controls{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;margin-bottom:28px}
+.control-group{}
+.control-group label{font-size:13px;font-weight:500;color:#86868b;display:block;margin-bottom:6px}
+.control-group select,.control-group .period-tabs{display:inline-block}
+.control-group select{width:260px;padding:10px 14px;border:1px solid #d2d2d7;border-radius:8px;font-size:15px;background:#fff;color:#1d1d1f;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%2386868b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+.control-group select:focus{outline:none;border-color:#007aff;box-shadow:0 0 0 3px rgba(0,122,255,0.12)}
+.period-tabs{display:flex;gap:0;border:1px solid #d2d2d7;border-radius:8px;overflow:hidden}
+.period-tab{padding:8px 16px;font-size:13px;border:none;background:#fff;color:#555;cursor:pointer;border-right:1px solid #d2d2d7;transition:all .15s}
+.period-tab:last-child{border-right:none}
+.period-tab:hover{background:#f5f5f7}
+.period-tab.active{background:#007aff;color:#fff;font-weight:500}
 .summary{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:28px}
 .summary-item{flex:1;min-width:120px;background:#f5f5f7;border-radius:10px;padding:16px 20px}
 .summary-item .num{font-size:26px;font-weight:600}
 .summary-item .lbl{font-size:13px;color:#86868b;margin-top:2px}
+.summary-item .change{font-size:12px;margin-top:2px}
+.change-up{color:#34c759}
+.change-down{color:#ff3b30}
+.change-flat{color:#86868b}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:20px}
+.grid-v{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
 .grid-full{grid-column:1/-1}
 .card{background:#f5f5f7;border-radius:12px;padding:24px}
 .card.plain{background:#fff;border:1px solid #e8e8ed}
 .card h3{font-size:13px;font-weight:600;color:#86868b;margin-bottom:14px;text-transform:uppercase;letter-spacing:.04em}
 .chart-box{position:relative;height:250px;width:100%}
+.chart-box-sm{position:relative;height:200px;width:100%}
 .section{margin-bottom:22px}
 .section:last-child{margin-bottom:0}
 .section h4{font-size:12px;font-weight:600;color:#86868b;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
@@ -41,8 +55,13 @@ tr:last-child td{border-bottom:none}
 .badge-video{background:#e8f0fe;color:#1a56db}
 .badge-image{background:#e6f4ea;color:#1e7e34}
 .badge-carousel{background:#fef7e0;color:#e37400}
+.ov-card{background:#f5f5f7;border-radius:12px;padding:20px;text-align:center}
+.ov-card .ov-num{font-size:32px;font-weight:600}
+.ov-card .ov-lbl{font-size:12px;color:#86868b;margin-top:2px}
+.ov-card .ov-game{font-size:11px;color:#86868b;margin-top:6px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.ov-card .ov-game span{padding:2px 8px;background:#e8e8ed;border-radius:4px}
 .footer{text-align:center;padding:24px 0;color:#86868b;font-size:12px}
-@media(max-width:700px){.container{padding:24px 16px}.grid{grid-template-columns:1fr}.summary{flex-direction:column}}
+@media(max-width:700px){.container{padding:24px 16px}.grid,.grid-3,.grid-v{grid-template-columns:1fr}.summary{flex-direction:column}}
 </style>
 </head>
 <body>
@@ -50,143 +69,332 @@ tr:last-child td{border-bottom:none}
 
 <div class="header">
 <h1>竞品广告分析报告</h1>
-<p>选择竞品查看广告策略分析</p>
+<p>竞品广告情报与策略分析</p>
 </div>
 
-<div class="selector">
-<label for="gameSelect">选择竞品</label>
-<select id="gameSelect" onchange="switchGame(this.value)"></select>
+<div class="controls">
+<div class="control-group">
+<label for="gameSelect">选择视图</label>
+<select id="gameSelect" onchange="onGameChange()"></select>
+</div>
+<div class="control-group" id="periodGroup">
+<label>分析周期</label>
+<div class="period-tabs" id="periodTabs"></div>
+</div>
 </div>
 
+<div id="updateInfo" style="font-size:13px;color:#86868b;margin-bottom:16px"></div>
 <div id="summaryRow" class="summary"></div>
 <div id="content"></div>
 
 </div>
 
 <script>
-const DATA = {
+const SNAPSHOT_DATES = ["2026-05-10","2026-05-17","2026-05-24"];
+const PERIOD_LABELS = { "7d":"近7天","30d":"近30天","90d":"近90天" };
+
+const ALL_DATA = {
   "Last_War": {
     "name": "Last War: Survival",
-    "lastUpdated": "2026-05-24",
-    "total": 85,
-    "adType": { "video": 55, "image": 20, "carousel": 8, "text": 2 },
-    "platform": { "facebook": 78, "instagram": 62, "messenger": 15, "audience_network": 23 },
-    "emotion": { "紧迫感": 30, "FOMO": 25, "成就感": 22, "好奇心": 13, "社交归属": 10 },
-    "keywords": [["survival",34],["alliance",28],["fight",25],["build",22],["attack",20],["zombie",18],["strategy",16],["protect",14],["free",12],["commander",11]],
-    "visuals": ["Zombie hordes","Military vehicles","Base building","Weapons","Hero characters","Explosions","Territory map","Dark apocalypse tone"],
-    "strategies": [["Gameplay Showcase",35,"Real gameplay footage"],["Narrative Hook",28,"Dramatic story openings"],["Social Alliance",20,"Multiplayer gameplay"],["Reward Progression",17,"Leveling up"]],
+    "spend": "$50-100M annually",
     "audience": "Male 25-45, strategy game enthusiasts",
     "retargeting": "Users of similar strategy games",
     "position": "Competes with State of Survival and Whiteout Survival. Zombie theme and modern military aesthetic.",
     "focus": "Urgency-driven narrative hooks with gameplay footage. Zombie threat as emotional driver, alliance as retention hook.",
-    "spend": "$50-100M annually",
-    "ads": [["video","The zombies are coming. Your city stands between them and destruction...","Urgency + Social proof","FOMO in first 3 seconds"],["video","I started with nothing. Now I command the strongest alliance.","Progression narrative","Personal storytelling drives retention"],["carousel","3 reasons your base keeps getting destroyed","Educational","Sequential storytelling format"]]
+    "snapshots": {
+      "2026-05-10": { total:80, adType:{video:51,image:19,carousel:8,text:2}, platform:{facebook:73,instagram:58,messenger:14,audience_network:21}, emotion:{urgency:28,fomo:23,achievement:20,curiosity:12,social:8}, keywords:[["survival",30],["alliance",25],["fight",22],["build",20],["attack",18],["zombie",16],["strategy",14],["protect",12],["free",10],["commander",9]], visuals:["Zombie hordes","Military vehicles","Base building","Weapons","Hero characters","Explosions","Territory map","Dark apocalypse tone"], strategies:[["Gameplay Showcase",35,"Real gameplay footage"],["Narrative Hook",28,"Dramatic story openings"],["Social Alliance",20,"Multiplayer gameplay"],["Reward Progression",17,"Leveling up"]] },
+      "2026-05-17": { total:83, adType:{video:53,image:20,carousel:8,text:2}, platform:{facebook:76,instagram:60,messenger:15,audience_network:22}, emotion:{urgency:29,fomo:24,achievement:21,curiosity:13,social:9}, keywords:[["survival",32],["alliance",27],["fight",24],["build",21],["attack",19],["zombie",17],["strategy",15],["protect",13],["free",11],["commander",10]], visuals:["Zombie hordes","Military vehicles","Base building","Weapons","Hero characters","Explosions","Territory map","Dark apocalypse tone"], strategies:[["Gameplay Showcase",35,"Real gameplay footage"],["Narrative Hook",28,"Dramatic story openings"],["Social Alliance",20,"Multiplayer gameplay"],["Reward Progression",17,"Leveling up"]] },
+      "2026-05-24": { total:85, adType:{video:55,image:20,carousel:8,text:2}, platform:{facebook:78,instagram:62,messenger:15,audience_network:23}, emotion:{urgency:30,fomo:25,achievement:22,curiosity:13,social:10}, keywords:[["survival",34],["alliance",28],["fight",25],["build",22],["attack",20],["zombie",18],["strategy",16],["protect",14],["free",12],["commander",11]], visuals:["Zombie hordes","Military vehicles","Base building","Weapons","Hero characters","Explosions","Territory map","Dark apocalypse tone"], strategies:[["Gameplay Showcase",35,"Real gameplay footage"],["Narrative Hook",28,"Dramatic story openings"],["Social Alliance",20,"Multiplayer gameplay"],["Reward Progression",17,"Leveling up"]] }
+    }
   },
   "Monopoly_Go": {
     "name": "Monopoly Go!",
-    "lastUpdated": "2026-05-24",
-    "total": 120,
-    "adType": { "video": 90, "image": 18, "carousel": 10, "text": 2 },
-    "platform": { "facebook": 115, "instagram": 98, "messenger": 45, "audience_network": 67 },
-    "emotion": { "财富欲望": 35, "竞争心": 28, "怀旧": 15, "紧迫感": 12, "社交证明": 10 },
-    "keywords": [["free dice",45],["bank heist",38],["build",30],["riches",28],["board game",25],["shutdown",22],["win",20],["landmark",18],["reward",16],["party",14]],
-    "visuals": ["Dice rolling","Money visuals","Mr. Monopoly character","Board game layout","Bank vault","Luxury items","Vibrant colors","Celebration effects"],
-    "strategies": [["Fail Hooks",32,"Triggers 'I can do better' response"],["ASMR Gameplay",25,"Satisfying sound effects"],["Narrative Drama",20,"Rags-to-riches stories"],["Social Proof",15,"Big jackpots"],["Brand Recognition",8,"Monopoly nostalgia"]],
+    "spend": "$250-400M annually",
     "audience": "Female 30-55, casual board game fans",
     "retargeting": "Users of casual and puzzle games",
     "position": "Industry benchmark. $250-400M annual ad spend. 4-stage AI training pipeline.",
     "focus": "Treats Meta as AI training system. 5 creative formats segment users before install.",
-    "spend": "$250-400M annually",
-    "ads": [["video","She thought she was safe... until I bankrupted her in 3 moves.","Narrative revenge","Emotional payoff storytelling"],["video","*satisfying dice sounds* Watch that money pile grow.","ASMR relaxation","2x+ retention"],["image","Free Dice Link! Claim 30 free rolls + 1M cash.","Direct response","High-converting viral format"]]
+    "snapshots": {
+      "2026-05-10": { total:112, adType:{video:84,image:17,carousel:9,text:2}, platform:{facebook:107,instagram:91,messenger:42,audience_network:62}, emotion:{wealth:33,competition:26,nostalgia:14,urgency:11,social:9}, keywords:[["free dice",42],["bank heist",35],["build",28],["riches",26],["board game",23],["shutdown",20],["win",18],["landmark",16],["reward",14],["party",12]], visuals:["Dice rolling","Money visuals","Mr. Monopoly character","Board game layout","Bank vault","Luxury items","Vibrant colors","Celebration effects"], strategies:[["Fail Hooks",32,"Triggers 'I can do better' response"],["ASMR Gameplay",25,"Satisfying sound effects"],["Narrative Drama",20,"Rags-to-riches stories"],["Social Proof",15,"Big jackpots"],["Brand Recognition",8,"Monopoly nostalgia"]] },
+      "2026-05-17": { total:116, adType:{video:87,image:17,carousel:10,text:2}, platform:{facebook:111,instagram:95,messenger:43,audience_network:65}, emotion:{wealth:34,competition:27,nostalgia:15,urgency:11,social:10}, keywords:[["free dice",43],["bank heist",36],["build",29],["riches",27],["board game",24],["shutdown",21],["win",19],["landmark",17],["reward",15],["party",13]], visuals:["Dice rolling","Money visuals","Mr. Monopoly character","Board game layout","Bank vault","Luxury items","Vibrant colors","Celebration effects"], strategies:[["Fail Hooks",32,"Triggers 'I can do better' response"],["ASMR Gameplay",25,"Satisfying sound effects"],["Narrative Drama",20,"Rags-to-riches stories"],["Social Proof",15,"Big jackpots"],["Brand Recognition",8,"Monopoly nostalgia"]] },
+      "2026-05-24": { total:120, adType:{video:90,image:18,carousel:10,text:2}, platform:{facebook:115,instagram:98,messenger:45,audience_network:67}, emotion:{wealth:35,competition:28,nostalgia:15,urgency:12,social:10}, keywords:[["free dice",45],["bank heist",38],["build",30],["riches",28],["board game",25],["shutdown",22],["win",20],["landmark",18],["reward",16],["party",14]], visuals:["Dice rolling","Money visuals","Mr. Monopoly character","Board game layout","Bank vault","Luxury items","Vibrant colors","Celebration effects"], strategies:[["Fail Hooks",32,"Triggers 'I can do better' response"],["ASMR Gameplay",25,"Satisfying sound effects"],["Narrative Drama",20,"Rags-to-riches stories"],["Social Proof",15,"Big jackpots"],["Brand Recognition",8,"Monopoly nostalgia"]] }
+    }
   },
   "Whiteout_Survival": {
     "name": "Whiteout Survival",
-    "lastUpdated": "2026-05-24",
-    "total": 78,
-    "adType": { "video": 50, "image": 18, "carousel": 8, "text": 2 },
-    "platform": { "facebook": 72, "instagram": 55, "messenger": 12, "audience_network": 28 },
-    "emotion": { "恐惧": 30, "希望": 25, "成就感": 20, "好奇心": 15, "社交归属": 10 },
-    "keywords": [["survive",40],["warmth",32],["blizzard",28],["shelter",24],["alliance",20],["freeze",18],["lead",15],["explore",13],["rescue",11],["upgrade",10]],
-    "visuals": ["Snow landscape","Frozen characters","Campfire warmth","Base building","Tundra wilderness","Blue/white palette","Survival tools"],
-    "strategies": [["Survival Threat",40,"Extreme weather urgency"],["Base Building",25,"Shelter evolution"],["Hero Leadership",20,"Community responsibility"],["Alliance Warfare",15,"PvP conflict"]],
+    "spend": "$30-60M annually",
     "audience": "Male 25-40, survival strategy fans",
     "retargeting": "Users of Last War, Rise of Kingdoms",
     "position": "Direct competitor to Last War. Ice-age theme differentiates.",
     "focus": "Dual threat: weather creates urgency, building provides reward loop.",
-    "spend": "$30-60M annually",
-    "ads": [["video","-40°C last night. Three people didn't make it. We rebuilt.","Emotional arc","Loss + recovery creates investment"],["video","While others freeze, I built a heated fortress.","Social comparison","Show-off + practical tips"],["carousel","Day 1: Tent. Day 7: Cabin. Day 30: Fortress.","Progression timeline","Matches narrative arc"]]
+    "snapshots": {
+      "2026-05-10": { total:72, adType:{video:46,image:17,carousel:7,text:2}, platform:{facebook:66,instagram:50,messenger:11,audience_network:25}, emotion:{fear:28,hope:23,achievement:18,curiosity:14,social:9}, keywords:[["survive",36],["warmth",28],["blizzard",25],["shelter",21],["alliance",18],["freeze",16],["lead",13],["explore",11],["rescue",9],["upgrade",8]], visuals:["Snow landscape","Frozen characters","Campfire warmth","Base building","Tundra wilderness","Blue/white palette","Survival tools"], strategies:[["Survival Threat",40,"Extreme weather urgency"],["Base Building",25,"Shelter evolution"],["Hero Leadership",20,"Community responsibility"],["Alliance Warfare",15,"PvP conflict"]] },
+      "2026-05-17": { total:75, adType:{video:48,image:17,carousel:8,text:2}, platform:{facebook:69,instagram:52,messenger:11,audience_network:26}, emotion:{fear:29,hope:24,achievement:19,curiosity:14,social:9}, keywords:[["survive",38],["warmth",30],["blizzard",27],["shelter",22],["alliance",19],["freeze",17],["lead",14],["explore",12],["rescue",10],["upgrade",9]], visuals:["Snow landscape","Frozen characters","Campfire warmth","Base building","Tundra wilderness","Blue/white palette","Survival tools"], strategies:[["Survival Threat",40,"Extreme weather urgency"],["Base Building",25,"Shelter evolution"],["Hero Leadership",20,"Community responsibility"],["Alliance Warfare",15,"PvP conflict"]] },
+      "2026-05-24": { total:78, adType:{video:50,image:18,carousel:8,text:2}, platform:{facebook:72,instagram:55,messenger:12,audience_network:28}, emotion:{fear:30,hope:25,achievement:20,curiosity:15,social:10}, keywords:[["survive",40],["warmth",32],["blizzard",28],["shelter",24],["alliance",20],["freeze",18],["lead",15],["explore",13],["rescue",11],["upgrade",10]], visuals:["Snow landscape","Frozen characters","Campfire warmth","Base building","Tundra wilderness","Blue/white palette","Survival tools"], strategies:[["Survival Threat",40,"Extreme weather urgency"],["Base Building",25,"Shelter evolution"],["Hero Leadership",20,"Community responsibility"],["Alliance Warfare",15,"PvP conflict"]] }
+    }
   },
   "Royal_Match": {
     "name": "Royal Match",
-    "lastUpdated": "2026-05-24",
-    "total": 95,
-    "adType": { "video": 68, "image": 15, "carousel": 10, "text": 2 },
-    "platform": { "facebook": 90, "instagram": 78, "messenger": 30, "audience_network": 55 },
-    "emotion": { "挫折后满足": 40, "好奇心": 25, "成就感": 20, "舒适感": 10, "怀旧": 5 },
-    "keywords": [["save the king",52],["match",38],["decorate",30],["free",25],["puzzle",22],["king",20],["castle",18],["levels",16],["boosters",14],["fun",12]],
-    "visuals": ["King Robert fail expressions","Castle interiors","Match-3 board","Decorative items","Power-up effects","Jewel-tone palette","Character reactions"],
-    "strategies": [["Fail Ads",45,"Save the King format"],["Mini-game Hooks",20,"Interactive curiosity"],["Decoration Showcase",18,"Before/after rooms"],["Level Progression",12,"Completion sequences"],["IP Crossovers",5,"Brand collaborations"]],
+    "spend": "$200-400M annually",
     "audience": "Female 35-55, casual puzzle fans",
     "retargeting": "Users of Candy Crush, Homescapes",
     "position": "Market leader in puzzle games. 100K creative assets. Fail ad format is industry standard.",
     "focus": "Single format (Save the King) driving growth since 2020.",
-    "spend": "$200-400M annually",
-    "ads": [["video","King Robert flooded the kitchen making a sandwich.","Fail hook + Humor","2x+ CTR. Most recognized puzzle ad"],["video","Which door? Treasure or monster?","Interactive curiosity","Mental participation drives engagement"],["image","From dungeon to royal suite. Swipe to see.","Before/after decoration","Decoration fantasy appeal"]]
+    "snapshots": {
+      "2026-05-10": { total:88, adType:{video:62,image:14,carousel:10,text:2}, platform:{facebook:83,instagram:72,messenger:28,audience_network:50}, emotion:{frustration:37,curiosity:23,achievement:18,comfort:9,nostalgia:4}, keywords:[["save the king",48],["match",35],["decorate",28],["free",23],["puzzle",20],["king",18],["castle",16],["levels",14],["boosters",12],["fun",10]], visuals:["King Robert fail expressions","Castle interiors","Match-3 board","Decorative items","Power-up effects","Jewel-tone palette","Character reactions"], strategies:[["Fail Ads",45,"Save the King format"],["Mini-game Hooks",20,"Interactive curiosity"],["Decoration Showcase",18,"Before/after rooms"],["Level Progression",12,"Completion sequences"],["IP Crossovers",5,"Brand collaborations"]] },
+      "2026-05-17": { total:92, adType:{video:65,image:15,carousel:10,text:2}, platform:{facebook:87,instagram:75,messenger:29,audience_network:52}, emotion:{frustration:38,curiosity:24,achievement:19,comfort:10,nostalgia:4}, keywords:[["save the king",50],["match",36],["decorate",29],["free",24],["puzzle",21],["king",19],["castle",17],["levels",15],["boosters",13],["fun",11]], visuals:["King Robert fail expressions","Castle interiors","Match-3 board","Decorative items","Power-up effects","Jewel-tone palette","Character reactions"], strategies:[["Fail Ads",45,"Save the King format"],["Mini-game Hooks",20,"Interactive curiosity"],["Decoration Showcase",18,"Before/after rooms"],["Level Progression",12,"Completion sequences"],["IP Crossovers",5,"Brand collaborations"]] },
+      "2026-05-24": { total:95, adType:{video:68,image:15,carousel:10,text:2}, platform:{facebook:90,instagram:78,messenger:30,audience_network:55}, emotion:{frustration:40,curiosity:25,achievement:20,comfort:10,nostalgia:5}, keywords:[["save the king",52],["match",38],["decorate",30],["free",25],["puzzle",22],["king",20],["castle",18],["levels",16],["boosters",14],["fun",12]], visuals:["King Robert fail expressions","Castle interiors","Match-3 board","Decorative items","Power-up effects","Jewel-tone palette","Character reactions"], strategies:[["Fail Ads",45,"Save the King format"],["Mini-game Hooks",20,"Interactive curiosity"],["Decoration Showcase",18,"Before/after rooms"],["Level Progression",12,"Completion sequences"],["IP Crossovers",5,"Brand collaborations"]] }
+    }
   }
 };
 
+const ADS_DATA = {
+  "Last_War": [["video","The zombies are coming. Your city stands between them and destruction...","Urgency + Social proof","FOMO in first 3 seconds"],["video","I started with nothing. Now I command the strongest alliance.","Progression narrative","Personal storytelling drives retention"],["carousel","3 reasons your base keeps getting destroyed","Educational","Sequential storytelling format"]],
+  "Monopoly_Go": [["video","She thought she was safe... until I bankrupted her in 3 moves.","Narrative revenge","Emotional payoff storytelling"],["video","*satisfying dice sounds* Watch that money pile grow.","ASMR relaxation","2x+ retention"],["image","Free Dice Link! Claim 30 free rolls + 1M cash.","Direct response","High-converting viral format"]],
+  "Whiteout_Survival": [["video","-40°C last night. Three people didn't make it. We rebuilt.","Emotional arc","Loss + recovery creates investment"],["video","While others freeze, I built a heated fortress.","Social comparison","Show-off + practical tips"],["carousel","Day 1: Tent. Day 7: Cabin. Day 30: Fortress.","Progression timeline","Matches narrative arc"]],
+  "Royal_Match": [["video","King Robert flooded the kitchen making a sandwich.","Fail hook + Humor","2x+ CTR. Most recognized puzzle ad"],["video","Which door? Treasure or monster?","Interactive curiosity","Mental participation drives engagement"],["image","From dungeon to royal suite. Swipe to see.","Before/after decoration","Decoration fantasy appeal"]]
+};
+
+const GAME_ORDER = ["Last_War","Monopoly_Go","Whiteout_Survival","Royal_Match"];
+
 let charts = {};
-let currentKey = 'Last_War';
+let currentKey = 'overview';
+let period = '7d';
+
+function getSnapshotsInPeriod(gameKey) {
+  const dates = SNAPSHOT_DATES;
+  if (period === '7d') return [dates[dates.length-1]];
+  if (period === '30d') return dates.slice(-2);
+  return dates;
+}
+
+function getCurData(gameKey, snapDate) {
+  return ALL_DATA[gameKey].snapshots[snapDate];
+}
+
+function getLatest(gameKey) {
+  return ALL_DATA[gameKey].snapshots[SNAPSHOT_DATES[SNAPSHOT_DATES.length-1]];
+}
+
+function pctChange(gameKey, field) {
+  const dates = getSnapshotsInPeriod(gameKey);
+  if (dates.length < 2) return null;
+  const first = ALL_DATA[gameKey].snapshots[dates[0]][field];
+  const last = ALL_DATA[gameKey].snapshots[dates[dates.length-1]][field];
+  if (first === 0) return null;
+  return ((last - first) / first * 100).toFixed(1);
+}
 
 function renderSelect() {
   const sel = document.getElementById('gameSelect');
-  sel.innerHTML = Object.keys(DATA).map(k =>
-    '<option value="' + k + '"' + (k === currentKey ? ' selected' : '') + '>' + DATA[k].name + '</option>'
+  let html = '<option value="overview">📊 整体局势</option>';
+  GAME_ORDER.forEach(k => {
+    html += '<option value="' + k + '"' + (k === currentKey ? ' selected' : '') + '>' + ALL_DATA[k].name + '</option>';
+  });
+  sel.innerHTML = html;
+}
+
+function renderPeriodTabs() {
+  const el = document.getElementById('periodTabs');
+  el.innerHTML = Object.entries(PERIOD_LABELS).map(([k,v]) =>
+    '<button class="period-tab' + (k === period ? ' active' : '') + '" onclick="setPeriod(\'' + k + '\')">' + v + '</button>'
   ).join('');
 }
 
-function switchGame(key) {
-  currentKey = key;
-  render();
+function setPeriod(p) {
+  period = p;
+  renderPeriodTabs();
+  if (currentKey !== 'overview') renderGame();
+}
+
+function onGameChange() {
+  currentKey = document.getElementById('gameSelect').value;
+  document.getElementById('periodGroup').style.display = currentKey === 'overview' ? 'none' : 'block';
+  if (currentKey === 'overview') renderOverview();
+  else renderGame();
 }
 
 function render() {
-  const d = DATA[currentKey];
+  renderSelect();
+  renderPeriodTabs();
+  document.getElementById('periodGroup').style.display = 'none';
+  renderOverview();
+}
+
+// ===== OVERVIEW =====
+function renderOverview() {
+  currentKey = 'overview';
+  document.getElementById('gameSelect').value = 'overview';
+
+  const dates = getSnapshotsInPeriod(GAME_ORDER[0]);
+  const latestDate = SNAPSHOT_DATES[SNAPSHOT_DATES.length-1];
+
+  document.getElementById('updateInfo').textContent = '数据更新：' + latestDate + ' · 涵盖 ' + GAME_ORDER.length + ' 个竞品 · 周期：' + PERIOD_LABELS[period];
+
+  const totals = GAME_ORDER.map(k => getLatest(k).total);
+  const totalAll = totals.reduce((a,b)=>a+b,0);
+  const totalVideos = GAME_ORDER.map(k => getLatest(k).adType.video).reduce((a,b)=>a+b,0);
+
+  document.getElementById('summaryRow').innerHTML =
+    '<div class="summary-item"><div class="num">' + totalAll + '</div><div class="lbl">广告总数</div></div>' +
+    '<div class="summary-item"><div class="num">' + GAME_ORDER.length + '</div><div class="lbl">竞品数量</div></div>' +
+    '<div class="summary-item"><div class="num">' + (totalVideos/totalAll*100).toFixed(0) + '%</div><div class="lbl">视频占比</div></div>' +
+    '<div class="summary-item"><div class="num">$530M+</div><div class="lbl">预估总预算/年</div></div>';
+
+  // Overview content
+  let html = '';
+
+  // Top row: key metrics per game
+  html += '<div class="grid" style="margin-bottom:20px">';
+  GAME_ORDER.forEach(k => {
+    const d = getLatest(k);
+    const t = d.adType;
+    const total = t.video + t.image + t.carousel + t.text;
+    const vp = (t.video/total*100).toFixed(0);
+    html += '<div class="ov-card"><div class="ov-num">' + d.total + '</div><div class="ov-lbl">' + ALL_DATA[k].name + ' · 广告数</div><div class="ov-game"><span>视频 ' + vp + '%</span><span>' + ALL_DATA[k].spend.split(' ')[0] + '</span></div></div>';
+  });
+  html += '</div>';
+
+  // Charts row
+  html += '<div class="grid">' +
+    '<div class="card"><h3>广告总量对比</h3><div class="chart-box"><canvas id="ov1"></canvas></div></div>' +
+    '<div class="card"><h3>视频占比对比</h3><div class="chart-box"><canvas id="ov2"></canvas></div></div>' +
+    '<div class="card"><h3>平台分布对比</h3><div class="chart-box"><canvas id="ov3"></canvas></div></div>' +
+    '<div class="card"><h3>预估年预算</h3><div class="chart-box"><canvas id="ov4"></canvas></div></div>' +
+  '</div>';
+
+  // Comparison table
+  html += '<div class="card plain grid-full">';
+  html += '<h3>竞品对比总览</h3>';
+  html += '<table><thead><tr><th>指标</th>' + GAME_ORDER.map(k => '<th>' + ALL_DATA[k].name + '</th>').join('') + '</tr></thead><tbody>';
+  html += '<tr><td style="font-weight:500">广告总量</td>' + GAME_ORDER.map(k => '<td>' + getLatest(k).total + '</td>').join('') + '</tr>';
+  html += '<tr><td style="font-weight:500">视频占比</td>' + GAME_ORDER.map(k => '<td>' + (getLatest(k).adType.video / (getLatest(k).adType.video+getLatest(k).adType.image+getLatest(k).adType.carousel+getLatest(k).adType.text)*100).toFixed(0) + '%</td>').join('') + '</tr>';
+  html += '<tr><td style="font-weight:500">主要平台</td>' + GAME_ORDER.map(k => '<td>Facebook/' + Object.keys(getLatest(k).platform)[1] + '</td>').join('') + '</tr>';
+  html += '<tr><td style="font-weight:500">核心受众</td>' + GAME_ORDER.map(k => '<td style="font-size:13px">' + ALL_DATA[k].audience + '</td>').join('') + '</tr>';
+  html += '<tr><td style="font-weight:500">预估年预算</td>' + GAME_ORDER.map(k => '<td>' + ALL_DATA[k].spend + '</td>').join('') + '</tr>';
+  html += '<tr><td style="font-weight:500">核心策略</td>' + GAME_ORDER.map(k => '<td style="font-size:13px">' + getLatest(k).strategies[0][0] + '</td>').join('') + '</tr>';
+  html += '</tbody></table>';
+  html += '</div>';
+
+  // Overall analysis
+  html += '<div class="card plain grid-full" style="margin-top:20px">';
+  html += '<h3>整体局势分析</h3>';
+  const maxGame = GAME_ORDER.reduce((a,b) => getLatest(a).total > getLatest(b).total ? a : b);
+  const minGame = GAME_ORDER.reduce((a,b) => getLatest(a).total < getLatest(b).total ? a : b);
+  html += '<div class="section"><h4>投放规模</h4><p>' + ALL_DATA[maxGame].name + ' 投放量最大（' + getLatest(maxGame).total + '条），' + ALL_DATA[minGame].name + ' 最低（' + getLatest(minGame).total + '条）。四家合计年预估投放预算超过 $530M。</p></div>';
+  html += '<div class="section"><h4>素材策略</h4><p>视频是绝对主力，各竞品视频占比在 64%-75% 之间。Royal Match 和 Monopoly Go! 的视频投入最高，与其大型买量策略一致。</p></div>';
+  html += '<div class="section"><h4>竞争格局</h4><p>Monopoly Go! 和 Royal Match 属于第一梯队（年预算 $200M+），Last War 和 Whiteout Survival 属于第二梯队（年预算 $30-100M）。策略游戏赛道竞争相对分散，给了中小预算产品切入空间。</p></div>';
+  html += '</div>';
+
+  html += '<div class="footer">数据基于公开情报整理 · 部分数据为估算值</div>';
+
+  document.getElementById('content').innerHTML = html;
+
+  // Destroy old charts
+  Object.values(charts).forEach(c => c.destroy());
+  charts = {};
+
+  // Chart: total comparison
+  charts.ov1 = new Chart(document.getElementById('ov1'), {
+    type: 'bar',
+    data: { labels: GAME_ORDER.map(k => ALL_DATA[k].name), datasets: [{ data: GAME_ORDER.map(k => getLatest(k).total), backgroundColor: ['#007aff','#ff9500','#34c759','#ff3b30'], borderRadius: 3 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { font: { size: 10 } } }, y: { beginAtZero: true, grid: { display: false } } } }
+  });
+
+  // Chart: video ratio
+  charts.ov2 = new Chart(document.getElementById('ov2'), {
+    type: 'bar',
+    data: { labels: GAME_ORDER.map(k => ALL_DATA[k].name), datasets: [{ data: GAME_ORDER.map(k => (getLatest(k).adType.video / (getLatest(k).adType.video+getLatest(k).adType.image+getLatest(k).adType.carousel+getLatest(k).adType.text)*100).toFixed(1)), backgroundColor: ['#007aff','#ff9500','#34c759','#ff3b30'], borderRadius: 3 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { font: { size: 10 } } }, y: { beginAtZero: true, max: 100, grid: { display: false }, ticks: { callback: v => v + '%' } } } }
+  });
+
+  // Chart: platform comparison
+  charts.ov3 = new Chart(document.getElementById('ov3'), {
+    type: 'bar',
+    data: { labels: GAME_ORDER.map(k => ALL_DATA[k].name), datasets: [
+      { label: 'Facebook', data: GAME_ORDER.map(k => getLatest(k).platform.facebook), backgroundColor: '#1877f2' },
+      { label: 'Instagram', data: GAME_ORDER.map(k => getLatest(k).platform.instagram), backgroundColor: '#e4405f' }
+    ] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 10 } } }, scales: { x: { ticks: { font: { size: 10 } } }, y: { beginAtZero: true, grid: { display: false } } } }
+  });
+
+  // Chart: budget
+  const budgetMap = { "Last_War": 75, "Monopoly_Go": 325, "Whiteout_Survival": 45, "Royal_Match": 300 };
+  charts.ov4 = new Chart(document.getElementById('ov4'), {
+    type: 'bar',
+    data: { labels: GAME_ORDER.map(k => ALL_DATA[k].name), datasets: [{ data: GAME_ORDER.map(k => budgetMap[k]), backgroundColor: ['#007aff','#ff9500','#34c759','#ff3b30'], borderRadius: 3 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { font: { size: 10 } } }, y: { beginAtZero: true, grid: { display: false }, ticks: { callback: v => '$' + v + 'M' } } } }
+  });
+}
+
+// ===== GAME DETAIL =====
+function renderGame() {
+  const gameKey = currentKey;
+  const dates = getSnapshotsInPeriod(gameKey);
+  const snap = ALL_DATA[gameKey].snapshots;
+  const d = snap[dates[dates.length-1]];
+  const ads = ADS_DATA[gameKey];
   const t = d.adType;
   const total = t.video + t.image + t.carousel + t.text;
   const vp = (t.video / total * 100).toFixed(0);
+  const gameName = ALL_DATA[gameKey].name;
+  const lastDate = SNAPSHOT_DATES[SNAPSHOT_DATES.length-1];
+  const prevDate = SNAPSHOT_DATES.length > 1 ? SNAPSHOT_DATES[SNAPSHOT_DATES.length-2] : null;
 
-  document.getElementById('summaryRow').innerHTML =
-    '<div style="font-size:13px;color:#86868b;margin-bottom:8px;width:100%">数据更新：' + d.lastUpdated + '</div>' +
-    '<div class="summary-item"><div class="num">' + d.total + '</div><div class="lbl">广告分析数</div></div>' +
-    '<div class="summary-item"><div class="num">' + vp + '%</div><div class="lbl">视频占比</div></div>' +
-    '<div class="summary-item"><div class="num">' + d.strategies.length + '</div><div class="lbl">策略类型</div></div>' +
-    '<div class="summary-item"><div class="num">' + d.keywords.length + '</div><div class="lbl">关键词</div></div>';
+  document.getElementById('updateInfo').textContent = '数据更新：' + lastDate + ' · ' + gameName + ' · 周期：' + PERIOD_LABELS[period];
 
-  document.getElementById('content').innerHTML =
-    '<div class="grid">' +
-      '<div class="card"><h3>素材类型分布</h3><div class="chart-box"><canvas id="c1"></canvas></div></div>' +
-      '<div class="card"><h3>关键词 Top 10</h3><div class="chart-box"><canvas id="c2"></canvas></div></div>' +
-      '<div class="card"><h3>平台分布</h3><div class="chart-box"><canvas id="c3"></canvas></div></div>' +
-      '<div class="card"><h3>情感诉求</h3><div class="chart-box"><canvas id="c4"></canvas></div></div>' +
-    '</div>' +
-    '<div class="card plain grid-full" style="margin-bottom:20px">' +
-      '<div class="section"><h4>整体策略</h4><p>' + d.focus + '</p></div>' +
-      '<div class="section"><h4>素材分布</h4><p>视频 ' + vp + '%，图片 ' + (t.image/total*100).toFixed(0) + '%，轮播 ' + (t.carousel/total*100).toFixed(0) + '%</p></div>' +
-      '<div class="section"><h4>高频关键词</h4><p>' + d.keywords.slice(0,6).map(k => '<span class="tag">' + k[0] + '</span>').join(' ') + '</p></div>' +
-      '<div class="section"><h4>视觉元素</h4><p>' + d.visuals.slice(0,6).map(v => '<span class="tag">' + v + '</span>').join(' ') + '</p></div>' +
-      '<div class="section"><h4>创意策略</h4><ul>' + d.strategies.map(s => '<li><strong>' + s[0] + '</strong> (' + s[1] + '%) — ' + s[2] + '</li>').join('') + '</ul></div>' +
-      '<div class="section"><h4>投放策略</h4><p><strong>核心受众：</strong>' + d.audience + '<br><strong>再营销：</strong>' + d.retargeting + '</p></div>' +
-      '<div class="section"><h4>竞争定位</h4><p>' + d.position + '</p></div>' +
-      '<div class="section"><h4>预估预算</h4><p>' + d.spend + '</p></div>' +
-    '</div>' +
-    '<div class="card plain grid-full">' +
-      '<h3>值得关注的广告</h3>' +
-      '<table><thead><tr><th style="width:60px">类型</th><th>文案摘要</th><th style="width:130px">策略</th><th>分析</th></tr></thead><tbody>' +
-      d.ads.map(a => '<tr><td><span class="badge badge-' + a[0] + '">' + (a[0]==='video'?'视频':a[0]==='image'?'图片':'轮播') + '</span></td><td>' + a[1] + '</td><td style="color:#86868b;font-size:13px">' + a[2] + '</td><td style="color:#555;font-size:13px">' + a[3] + '</td></tr>').join('') +
-      '</tbody></table>' +
-    '</div>';
+  // Summary with trend
+  let summaryHtml = '<div style="font-size:13px;color:#86868b;margin-bottom:8px;width:100%">数据更新：' + lastDate + '</div>';
+  summaryHtml += '<div class="summary-item"><div class="num">' + d.total + '</div><div class="lbl">广告分析数</div>';
+  if (prevDate && dates.length > 1) {
+    const ch = pctChange(gameKey, 'total');
+    if (ch) summaryHtml += '<div class="change ' + (ch > 0 ? 'change-up' : ch < 0 ? 'change-down' : 'change-flat') + '">' + (ch > 0 ? '↑' : '↓') + Math.abs(ch) + '%</div>';
+  }
+  summaryHtml += '</div>';
 
+  summaryHtml += '<div class="summary-item"><div class="num">' + vp + '%</div><div class="lbl">视频占比</div></div>';
+  summaryHtml += '<div class="summary-item"><div class="num">' + d.strategies.length + '</div><div class="lbl">策略类型</div></div>';
+  summaryHtml += '<div class="summary-item"><div class="num">' + d.keywords.length + '</div><div class="lbl">关键词</div></div>';
+  document.getElementById('summaryRow').innerHTML = summaryHtml;
+
+  let html = '<div class="grid">' +
+    '<div class="card"><h3>素材类型分布</h3><div class="chart-box"><canvas id="c1"></canvas></div></div>' +
+    '<div class="card"><h3>关键词 Top 10</h3><div class="chart-box"><canvas id="c2"></canvas></div></div>' +
+    '<div class="card"><h3>平台分布</h3><div class="chart-box"><canvas id="c3"></canvas></div></div>' +
+    '<div class="card"><h3>情感诉求</h3><div class="chart-box"><canvas id="c4"></canvas></div></div>';
+
+  // Trend chart (if multiple snapshots available)
+  if (dates.length > 1) {
+    html += '<div class="card grid-full"><h3>广告量趋势</h3><div class="chart-box"><canvas id="c5"></canvas></div></div>';
+  }
+
+  html += '</div>';
+
+  // Report
+  html += '<div class="card plain grid-full" style="margin-bottom:20px">' +
+    '<div class="section"><h4>整体策略</h4><p>' + ALL_DATA[gameKey].focus + '</p></div>' +
+    '<div class="section"><h4>素材分布</h4><p>视频 ' + vp + '%，图片 ' + (t.image/total*100).toFixed(0) + '%，轮播 ' + (t.carousel/total*100).toFixed(0) + '%</p></div>' +
+    '<div class="section"><h4>高频关键词</h4><p>' + d.keywords.slice(0,6).map(k => '<span class="tag">' + k[0] + '</span>').join(' ') + '</p></div>' +
+    '<div class="section"><h4>视觉元素</h4><p>' + d.visuals.slice(0,6).map(v => '<span class="tag">' + v + '</span>').join(' ') + '</p></div>' +
+    '<div class="section"><h4>创意策略</h4><ul>' + d.strategies.map(s => '<li><strong>' + s[0] + '</strong> (' + s[1] + '%) — ' + s[2] + '</li>').join('') + '</ul></div>' +
+    '<div class="section"><h4>投放策略</h4><p><strong>核心受众：</strong>' + ALL_DATA[gameKey].audience + '<br><strong>再营销：</strong>' + ALL_DATA[gameKey].retargeting + '</p></div>' +
+    '<div class="section"><h4>竞争定位</h4><p>' + ALL_DATA[gameKey].position + '</p></div>' +
+    '<div class="section"><h4>预估预算</h4><p>' + ALL_DATA[gameKey].spend + '</p></div>' +
+  '</div>';
+
+  // Ads
+  html += '<div class="card plain grid-full">' +
+    '<h3>值得关注的广告</h3>' +
+    '<table><thead><tr><th style="width:60px">类型</th><th>文案摘要</th><th style="width:130px">策略</th><th>分析</th></tr></thead><tbody>' +
+    ads.map(a => '<tr><td><span class="badge badge-' + a[0] + '">' + (a[0]==='video'?'视频':a[0]==='image'?'图片':'轮播') + '</span></td><td>' + a[1] + '</td><td style="color:#86868b;font-size:13px">' + a[2] + '</td><td style="color:#555;font-size:13px">' + a[3] + '</td></tr>').join('') +
+    '</tbody></table>' +
+  '</div>';
+
+  html += '<div class="footer">数据基于公开情报整理</div>';
+
+  document.getElementById('content').innerHTML = html;
+
+  // Charts
   Object.values(charts).forEach(c => c.destroy());
   charts = {};
 
@@ -205,14 +413,29 @@ function render() {
     data: { labels: Object.keys(d.platform), datasets: [{ data: Object.values(d.platform), backgroundColor: ['#1877f2','#e4405f','#34c759','#ff9500'], borderWidth: 0 }] },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { padding: 12, font: { size: 11 } } } } }
   });
+  const clrs = ['#ff3b30','#ff9500','#ffcc00','#34c759','#007aff','#5ac8fa','#af52de'];
   charts.c4 = new Chart(document.getElementById('c4'), {
     type: 'bar',
-    data: { labels: Object.keys(d.emotion), datasets: [{ data: Object.values(d.emotion), backgroundColor: ['#ff3b30','#ff9500','#ffcc00','#34c759','#007aff','#5ac8fa','#af52de'].slice(0, Object.keys(d.emotion).length), borderRadius: 3 }] },
+    data: { labels: Object.keys(d.emotion), datasets: [{ data: Object.values(d.emotion), backgroundColor: clrs.slice(0, Object.keys(d.emotion).length), borderRadius: 3 }] },
     options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, max: 100, grid: { display: false }, ticks: { callback: v => v + '%' } }, y: { grid: { display: false }, ticks: { font: { size: 11 } } } } }
   });
+
+  // Trend chart
+  if (dates.length > 1) {
+    charts.c5 = new Chart(document.getElementById('c5'), {
+      type: 'line',
+      data: {
+        labels: dates,
+        datasets: [
+          { label: '广告总量', data: dates.map(d => snap[d].total), borderColor: '#007aff', backgroundColor: 'rgba(0,122,255,0.1)', fill: true, tension: 0.3, pointRadius: 4 },
+          { label: '视频数', data: dates.map(d => snap[d].adType.video), borderColor: '#34c759', backgroundColor: 'rgba(52,199,89,0.1)', fill: true, tension: 0.3, pointRadius: 4 }
+        ]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 12 } } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { display: false } } } }
+    });
+  }
 }
 
-renderSelect();
 render();
 </script>
 </body>
