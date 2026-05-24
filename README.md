@@ -4,80 +4,79 @@
 
 ## 项目概述
 
-基于 Claude Cowork + Claude Code + DeepSeek 搭建的竞品广告分析自动化系统。输入竞品游戏名称，输出素材类型分布、高频视觉元素、文案关键词、推测投放策略。
+基于 Claude Cowork + 定时任务调度 + Vercel 部署的竞品广告素材自动化分析系统。每周一自动检索竞品广告素材情报，结构化输出后自动推送部署。
 
 ## 工具链
 
 | 工具 | 用途 |
 |------|------|
-| **Claude Cowork** | 编排器 + AI 分析引擎。定时任务调度、数据采集执行、策略分析 |
-| **Claude Code** | Python 采集脚本开发、API 调试 |
-| **DeepSeek AI** | 广告素材策略分析、关键词提取、投放策略推断 |
-| **Meta Ad Library API** | 公共广告数据源（需注册 Developer 账号） |
-| **Vercel** | 前端展示网站部署 |
+| **Claude Cowork** | 流程编排、定时任务调度、AI 情报检索与结构化分析 |
+| **Claude Code** | 脚本开发 |
+| **WebSearch** | 精准微观广告素材情报检索 |
+| **Chart.js** | 前端数据可视化 |
+| **Vercel + 自定义域名** | 前端展示网站部署 |
+| **GitHub Actions** | 自动推送与持续部署 |
 
 ## 项目结构
 
 ```
 ad-analyzer/
-├── index.html              # 前端展示页面
-├── vercel.json              # Vercel 部署配置
+├── index.html              # 前端展示页面（内嵌 ALL_DATA 结构 + Chart.js 图表）
+├── auto_push.py            # 自动提交推送脚本（定时任务最后一步触发）
+├── Prompt模板清单.md       # Agent 检索与分析 Prompt 模板库
 ├── data/
-│   ├── Last_War_analysis.json
+│   ├── Last_War_analysis.json     # 竞品历史分析数据
 │   ├── Monopoly_Go_analysis.json
 │   ├── Whiteout_Survival_analysis.json
-│   └── Royal_Match_analysis.json
-├── scripts/
-│   ├── collect_ads.py       # Meta API 数据采集脚本
-│   └── config.json          # 配置文件
-└── README.md
+│   ├── Royal_Match_analysis.json
+│   └── weekly_report_*.md         # 定时任务生成的周报
+├── README.md
+└── 提交说明.md
 ```
 
-## 工作流
+## 自动化流程
 
-1. 用户输入竞品名称
-2. Python 脚本调用 Meta Ad Library API 采集广告数据
-3. DeepSeek AI 分析每条广告（素材类型、关键词、情感、策略）
-4. 聚合生成结构化报告
-5. 前端网站展示图表和分析结果
-
-## 当前状态
-
-### 已完成
-- [x] 数据采集管道（Python 脚本，预留 Meta API 接口）
-- [x] 基于公开情报的 4 个竞品广告分析
-- [x] 素材类型自动分类与统计
-- [x] 高频关键词提取与排序
-- [x] 投放策略推断与报告生成
-- [x] 可视化前端展示网站
-- [x] Vercel 部署配置
-
-### 待完善
-- [ ] 接入 Meta Ad Library API（需注册 Facebook Developer 账号）
-- [ ] 接入 TikTok Ads 数据
-- [ ] 广告素材图片的 Vision 分析
-- [ ] 周同比趋势对比
-
-## 部署
-
-本项目为纯静态站点，可直接部署到 Vercel：
-
-```bash
-# 1. 推送到 GitHub
-git add .
-git commit -m "init"
-git push
-
-# 2. 在 Vercel 导入仓库，自动部署
-# 或使用 Vercel CLI
-vercel --prod
+```
+每周一 09:09 定时触发
+       │
+       ▼
+① 读取 index.html 解析当前竞品名单
+       │
+       ▼
+② 逐个竞品执行精准微观情报检索
+   · 搜索 ad copy examples / 广告文案拆解
+   · 站内搜索 appgrowing.net / socialpeta.com
+   · 搜索 UA strategy / retargeting 策略线索
+       │
+       ▼
+③ 基于搜索文本合理推算结构化数据（素材类型、关键词、情感诉求等）
+       │
+       ▼
+④ 添加新快照到 index.html + 生成 markdown 周报
+       │
+       ▼
+⑤ 自动执行 python auto_push.py → GitHub → Vercel 自动部署
 ```
 
-## 配置说明
+## 当前能力
 
-`scripts/config.json` 中包含 Meta Token 和 DeepSeek API Key 配置，接入实时数据时填写即可。
+- 自动定时任务：每周一执行完整情报检索 → 分析 → 部署链路
+- 多周期视图：近7天/30天/90天数据切换
+- 趋势折线图：广告量、视频数随周变化趋势
+- 整体局势对比：4 个竞品的广告量、视频占比、平台分布、预算对比
+- 环比变化指示：广告数自动显示 ↑↓ 百分比
+- 数据更新时间显示
+- 单游戏详情页：素材类型分布、关键词、平台、情感、策略、竞品广告案例
 
-## 数据说明
+## 已知局限
 
-当前 data/ 目录下的分析数据基于 Web Search 公开情报整理。
-接入 Meta Ad Library API 后，数据将自动从 API 获取，无需手动更新。
+- Meta Ad Library API 不可用（无法注册 Facebook Developer 账号），数据源依赖 WebSearch 公开情报检索
+- 无 TikTok 数据源
+- 广告素材图片的多模态 AI 视觉分析未接入（需要手动截图 + 调用 Vision API）
+- 当前数据为基于公开情报的合理估算，精度不如 API 直接拉取
+
+## 后续扩展方向
+
+1. 接入 Meta API 后，数据摄入模块替换为自动拉取，核心 AI 分析逻辑无需修改
+2. 增加素材截图的多模态自动分析流水线
+3. 接入 TikTok Creative Center 补充跨平台监控
