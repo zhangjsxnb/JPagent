@@ -1,8 +1,0 @@
-{
-  "name": "ad-analyzer",
-  "version": "1.0.0",
-  "description": "竞品广告分析 Agent",
-  "scripts": {
-    "start": "npx serve ."
-  }
-}
