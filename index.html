@@ -61,6 +61,10 @@ tr:last-child td{border-bottom:none}
 .ov-card .ov-game{font-size:11px;color:#86868b;margin-top:6px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
 .ov-card .ov-game span{padding:2px 8px;background:#e8e8ed;border-radius:4px}
 .footer{text-align:center;padding:24px 0;color:#86868b;font-size:12px}
+.error-box{display:none;text-align:center;padding:60px 24px;color:#86868b}
+.error-box .err-icon{font-size:48px;margin-bottom:16px}
+.error-box .err-text{font-size:16px;color:#1d1d1f;margin-bottom:8px}
+.error-box .err-sub{font-size:13px}
 @media(max-width:700px){.container{padding:24px 16px}.grid,.grid-3,.grid-v{grid-template-columns:1fr}.summary{flex-direction:column}}
 </style>
 </head>
@@ -86,6 +90,11 @@ tr:last-child td{border-bottom:none}
 <div id="updateInfo" style="font-size:13px;color:#86868b;margin-bottom:16px"></div>
 <div id="summaryRow" class="summary"></div>
 <div id="content"></div>
+<div id="errorBox" class="error-box">
+  <div class="err-icon">⏳</div>
+  <div class="err-text">数据正在同步中，请稍后刷新...</div>
+  <div class="err-sub">如果长时间未加载，请检查网络连接后刷新页面</div>
+</div>
 
 </div>
 
@@ -215,10 +224,17 @@ function onGameChange() {
 }
 
 function render() {
-  renderSelect();
-  renderPeriodTabs();
-  document.getElementById('periodGroup').style.display = 'none';
-  renderOverview();
+  try {
+    renderSelect();
+    renderPeriodTabs();
+    document.getElementById('periodGroup').style.display = 'none';
+    renderOverview();
+  } catch (e) {
+    document.getElementById('errorBox').style.display = 'block';
+    document.getElementById('content').innerHTML = '';
+    document.getElementById('summaryRow').innerHTML = '';
+    console.error('render error:', e);
+  }
 }
 
 // ===== OVERVIEW =====
@@ -436,7 +452,10 @@ function renderGame() {
   }
 }
 
-render();
+try { render(); } catch (e) {
+  document.getElementById('errorBox').style.display = 'block';
+  console.error('init render error:', e);
+}
 </script>
 </body>
 </html>

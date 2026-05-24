@@ -6,6 +6,18 @@
 
 基于 Claude Cowork + 定时任务调度 + Vercel 部署的竞品广告素材自动化分析系统。每周一自动检索竞品广告素材情报，结构化输出后自动推送部署。
 
+## Quick Start
+
+```bash
+# 1. 安装依赖
+pip install -r scripts/requirements.txt
+
+# 2. 手动触发全量流水线（数据检索 → 分析 → 报告 → 自动推送部署）
+python run_weekly.py
+
+# 3. 或等待定时任务自动执行（每周一 09:09）
+```
+
 ## 工具链
 
 | 工具 | 用途 |
@@ -21,15 +33,18 @@
 
 ```
 ad-analyzer/
-├── index.html              # 前端展示页面（内嵌 ALL_DATA 结构 + Chart.js 图表）
-├── auto_push.py            # 自动提交推送脚本（定时任务最后一步触发）
-├── Prompt模板清单.md       # Agent 检索与分析 Prompt 模板库
+├── index.html                    # 前端展示页面（内嵌 ALL_DATA + Chart.js 图表）
+├── auto_push.py                  # 自动提交推送脚本
+├── run_weekly.py                 # 全量流水线入口脚本
+├── Prompt模板清单.md             # Agent 检索与分析 Prompt 模板库
+├── scripts/
+│   └── requirements.txt          # Python 依赖
 ├── data/
-│   ├── Last_War_analysis.json     # 竞品历史分析数据
+│   ├── Last_War_analysis.json    # 竞品历史分析数据
 │   ├── Monopoly_Go_analysis.json
 │   ├── Whiteout_Survival_analysis.json
 │   ├── Royal_Match_analysis.json
-│   └── weekly_report_*.md         # 定时任务生成的周报
+│   └── weekly_report_*.md        # 定时任务生成的周报
 ├── README.md
 └── 提交说明.md
 ```
