@@ -67,6 +67,7 @@ tr:last-child td{border-bottom:none}
 const DATA = {
   "Last_War": {
     "name": "Last War: Survival",
+    "lastUpdated": "2026-05-24",
     "total": 85,
     "adType": { "video": 55, "image": 20, "carousel": 8, "text": 2 },
     "platform": { "facebook": 78, "instagram": 62, "messenger": 15, "audience_network": 23 },
@@ -83,6 +84,7 @@ const DATA = {
   },
   "Monopoly_Go": {
     "name": "Monopoly Go!",
+    "lastUpdated": "2026-05-24",
     "total": 120,
     "adType": { "video": 90, "image": 18, "carousel": 10, "text": 2 },
     "platform": { "facebook": 115, "instagram": 98, "messenger": 45, "audience_network": 67 },
@@ -99,6 +101,7 @@ const DATA = {
   },
   "Whiteout_Survival": {
     "name": "Whiteout Survival",
+    "lastUpdated": "2026-05-24",
     "total": 78,
     "adType": { "video": 50, "image": 18, "carousel": 8, "text": 2 },
     "platform": { "facebook": 72, "instagram": 55, "messenger": 12, "audience_network": 28 },
@@ -115,6 +118,7 @@ const DATA = {
   },
   "Royal_Match": {
     "name": "Royal Match",
+    "lastUpdated": "2026-05-24",
     "total": 95,
     "adType": { "video": 68, "image": 15, "carousel": 10, "text": 2 },
     "platform": { "facebook": 90, "instagram": 78, "messenger": 30, "audience_network": 55 },
@@ -153,6 +157,7 @@ function render() {
   const vp = (t.video / total * 100).toFixed(0);
 
   document.getElementById('summaryRow').innerHTML =
+    '<div style="font-size:13px;color:#86868b;margin-bottom:8px;width:100%">数据更新：' + d.lastUpdated + '</div>' +
     '<div class="summary-item"><div class="num">' + d.total + '</div><div class="lbl">广告分析数</div></div>' +
     '<div class="summary-item"><div class="num">' + vp + '%</div><div class="lbl">视频占比</div></div>' +
     '<div class="summary-item"><div class="num">' + d.strategies.length + '</div><div class="lbl">策略类型</div></div>' +
