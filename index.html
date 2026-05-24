@@ -345,4 +345,163 @@ function renderOverview() {
 
 // ===== GAME DETAIL =====
 function renderGame() {
-  const gameKey = currentKey
+  const gameKey = currentKey;
+  if (!gameKey || gameKey === 'overview') { renderOverview(); return; }
+  const game = ALL_DATA[gameKey];
+  if (!game) return;
+  const dates = getSnapshotsInPeriod(gameKey);
+  const latest = getLatest(gameKey);
+  const latestDate = SNAPSHOT_DATES[SNAPSHOT_DATES.length-1];
+
+  document.getElementById('gameSelect').value = gameKey;
+  document.getElementById('updateInfo').textContent = '数据更新：' + latestDate + ' · ' + game.name + ' · 周期：' + PERIOD_LABELS[period];
+
+  // Summary row
+  const totalAdTypes = latest.adType.video + latest.adType.image + latest.adType.carousel + latest.adType.text;
+  const videoPct = (latest.adType.video / totalAdTypes * 100).toFixed(0);
+  const change = pctChange(gameKey, 'total');
+  let changeHtml = '';
+  if (change !== null) {
+    const arrow = change >= 0 ? '↑' : '↓';
+    const cls = change >= 0 ? 'change-up' : 'change-down';
+    changeHtml = '<div class="change ' + cls + '">' + arrow + Math.abs(change) + '%</div>';
+  }
+
+  document.getElementById('summaryRow').innerHTML =
+    '<div class="summary-item"><div class="num">' + latest.total + '</div><div class="lbl">广告总数</div>' + changeHtml + '</div>' +
+    '<div class="summary-item"><div class="num">' + videoPct + '%</div><div class="lbl">视频占比</div></div>' +
+    '<div class="summary-item"><div class="num">' + Object.keys(latest.platform).length + '</div><div class="lbl">投放平台</div></div>' +
+    '<div class="summary-item"><div class="num">' + game.spend.split(' ')[0] + '</div><div class="lbl">预估年预算</div></div>';
+
+  let html = '';
+
+  // Charts grid
+  html += '<div class="grid">';
+  html += '<div class="card"><h3>素材类型分布</h3><div class="chart-box"><canvas id="gd1"></canvas></div></div>';
+  html += '<div class="card"><h3>平台分布</h3><div class="chart-box"><canvas id="gd2"></canvas></div></div>';
+  html += '<div class="card"><h3>情感诉求分析</h3><div class="chart-box"><canvas id="gd3"></canvas></div></div>';
+  html += '<div class="card"><h3>高频关键词 Top 10</h3><div class="chart-box"><canvas id="gd4"></canvas></div></div>';
+  html += '</div>';
+
+  // Trend chart
+  html += '<div class="card plain grid-full" style="margin-bottom:20px">';
+  html += '<h3>广告量趋势</h3><div class="chart-box"><canvas id="gd5"></canvas></div>';
+  html += '</div>';
+
+  // Visual elements
+  html += '<div class="card plain grid-full" style="margin-bottom:20px">';
+  html += '<h3>高频视觉元素</h3>';
+  html += '<div>' + (latest.visuals || []).map(v => '<span class="tag">' + v + '</span>').join('') + '</div>';
+  html += '</div>';
+
+  // Strategies table
+  html += '<div class="card plain grid-full" style="margin-bottom:20px">';
+  html += '<h3>创意策略</h3>';
+  html += '<table><thead><tr><th>策略</th><th>占比</th><th>说明</th></tr></thead><tbody>';
+  (latest.strategies || []).forEach(s => {
+    html += '<tr><td style="font-weight:500">' + s[0] + '</td><td>' + s[1] + '%</td><td style="font-size:13px;color:#555">' + s[2] + '</td></tr>';
+  });
+  html += '</tbody></table>';
+  html += '</div>';
+
+  // Audience & positioning
+  html += '<div class="grid" style="margin-bottom:20px">';
+  html += '<div class="card plain"><h3>目标受众</h3><p style="font-size:15px">' + game.audience + '</p></div>';
+  html += '<div class="card plain"><h3>再营销策略</h3><p style="font-size:15px">' + game.retargeting + '</p></div>';
+  html += '</div>';
+
+  html += '<div class="card plain grid-full" style="margin-bottom:20px">';
+  html += '<h3>竞争定位</h3><p style="font-size:15px">' + game.position + '</p>';
+  html += '<p style="font-size:15px;margin-top:8px;color:#555">' + game.focus + '</p></div>';
+
+  // Ad examples table
+  html += '<div class="card plain grid-full">';
+  html += '<h3>广告案例分析</h3>';
+  html += '<table><thead><tr><th>类型</th><th>文案/描述</th><th>策略点</th><th>亮点</th></tr></thead><tbody>';
+  if (ADS_DATA[gameKey]) {
+    ADS_DATA[gameKey].forEach(ad => {
+      const typeClass = ad[0] === 'video' ? 'video' : ad[0] === 'image' ? 'image' : 'carousel';
+      html += '<tr><td><span class="badge badge-' + typeClass + '">' + ad[0] + '</span></td><td style="font-size:13px">' + ad[1] + '</td><td style="font-size:13px">' + ad[2] + '</td><td style="font-size:13px;color:#555">' + (ad[3] || '') + '</td></tr>';
+    });
+  }
+  html += '</tbody></table>';
+  html += '</div>';
+
+  html += '<div class="footer">数据基于公开情报整理 · 部分数据为估算值</div>';
+
+  document.getElementById('content').innerHTML = html;
+
+  // Destroy old charts
+  Object.values(charts).forEach(c => c.destroy());
+  charts = {};
+
+  // Pie chart: ad type distribution
+  charts.gd1 = new Chart(document.getElementById('gd1'), {
+    type: 'pie',
+    data: {
+      labels: ['视频','图片','轮播','纯文字'],
+      datasets: [{ data: [latest.adType.video, latest.adType.image, latest.adType.carousel, latest.adType.text], backgroundColor: ['#007aff','#ff9500','#34c759','#ff3b30'] }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 10 } } } }
+  });
+
+  // Bar chart: platform distribution
+  const platKeys = Object.keys(latest.platform);
+  const platColors = ['#1877f2','#e4405f','#00b4d8','#ff6b6b'];
+  charts.gd2 = new Chart(document.getElementById('gd2'), {
+    type: 'bar',
+    data: {
+      labels: platKeys.map(k => ({facebook:'Facebook',instagram:'Instagram',messenger:'Messenger',audience_network:'Audience Network'})[k] || k),
+      datasets: [{ data: platKeys.map(k => latest.platform[k]), backgroundColor: platColors.slice(0, platKeys.length), borderRadius: 3 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { display: false } }, x: { ticks: { font: { size: 10 } } } } }
+  });
+
+  // Doughnut chart: emotional appeals
+  const emoKeys = Object.keys(latest.emotion);
+  const emoLabels = {
+    urgency:'紧迫感', fomo:'FOMO', achievement:'成就感', curiosity:'好奇心',
+    social:'社交', fear:'恐惧', hope:'希望', frustration:'挫败感',
+    wealth:'财富', competition:'竞争', nostalgia:'怀旧', comfort:'舒适'
+  };
+  const emoColors = ['#ff6b6b','#feca57','#48dbfb','#ff9ff3','#54a0ff','#5f27cd','#1dd1a1','#e17055','#00cec9','#6c5ce7','#fd79a8','#fdcb6e'];
+  charts.gd3 = new Chart(document.getElementById('gd3'), {
+    type: 'doughnut',
+    data: {
+      labels: emoKeys.map(k => emoLabels[k] || k),
+      datasets: [{ data: emoKeys.map(k => latest.emotion[k]), backgroundColor: emoColors.slice(0, emoKeys.length) }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 10 } } } }
+  });
+
+  // Bar chart: top keywords
+  const kwData = (latest.keywords || []).slice(0, 10);
+  charts.gd4 = new Chart(document.getElementById('gd4'), {
+    type: 'bar',
+    data: {
+      labels: kwData.map(k => k[0]),
+      datasets: [{ data: kwData.map(k => k[1]), backgroundColor: '#007aff', borderRadius: 3 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { font: { size: 10 } } }, y: { beginAtZero: true, grid: { display: false } } } }
+  });
+
+  // Line chart: trend over snapshots
+  const trendDates = SNAPSHOT_DATES;
+  charts.gd5 = new Chart(document.getElementById('gd5'), {
+    type: 'line',
+    data: {
+      labels: trendDates,
+      datasets: [
+        { label: '广告总数', data: trendDates.map(d => { const s = ALL_DATA[gameKey].snapshots[d]; return s ? s.total : 0; }), borderColor: '#007aff', backgroundColor: 'rgba(0,122,255,0.1)', fill: true, tension: 0.3, pointRadius: 4 },
+        { label: '视频数', data: trendDates.map(d => { const s = ALL_DATA[gameKey].snapshots[d]; return s ? s.adType.video : 0; }), borderColor: '#34c759', backgroundColor: 'rgba(52,199,89,0.1)', fill: true, tension: 0.3, pointRadius: 4 }
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 10 } } }, scales: { y: { beginAtZero: true, grid: { display: true, color: '#f0f0f0' } }, x: { grid: { display: false } } } }
+  });
+}
+
+// ===== INIT =====
+try { render(); } catch(e) { document.getElementById('errorBox').style.display = 'block'; console.error(e); }
+</script>
+</body>
+</html>
